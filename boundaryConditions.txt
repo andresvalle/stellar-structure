@@ -1,0 +1,13 @@
+#
+#	Boundary Conditions
+#	SI units
+#
+
+# Core density ( kg / m^3 )
+156000
+
+# Core pressure ( Pa )
+2.38e16
+
+# Total radius ( m )
+696000000
