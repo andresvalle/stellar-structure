@@ -10,121 +10,120 @@
 
 
 //Constants
-double paso;
-const double pi=3.141592653589793238463;
-const double constanteGravitacional=6.67384e-11;
-const double inversoGama=0.6;
-const double politropica=247799612;
+double step;
+double polytropicConstant;
+const double pi = 3.141592653589793238463;
+const double gravitationalConstant = 6.67384e-11;
+const double polytropicIndex = 0.6;
 
 
 //Prototipes
-double funcionMasa(double , double , double );
-double derivadaMasa(double , double , double );
-double funcionDensidad( double );
-double funcionPresion(double , double , double , double );
-double derivadaPresion(double , double , double , double );
-double derivadaPotencial ( double , double , double );
-double funcionPotencial(double , double , double );
+double massFunction(double , double , double );
+double massDerivative(double , double , double );
+double densityFunction( double );
+double pressureFunction(double , double , double , double );
+double pressureDerivative(double , double , double , double );
 
 
-int main ()
+int main ( )
 	{
 
 //lectura de condiciones iniciales
-//
-		string linea;
-		ifstream condiciones ("initialConditions.txt");
-		int contador=0;
-	 	double numero[20] , temporal=0;  
 
-		if (condiciones.is_open())
+		string line;
+		ifstream conditions("boundaryConditions.txt");
+		int counter=0;
+	 	double number[20] , temp = 0;  
+
+		if ( conditions.is_open() )
 			{
-				while ( getline (condiciones,linea) )
+				while ( getline ( conditions , line ) )
 					{
 						//Si la linea del archivo de condiciones iniciales comienza con
 						// ### es un comentario
-						if(linea[0] != '#' )
+						if( line[0] != '#' )
 							{
 
-								istringstream contenidoLinea( linea );
+								istringstream contenidoLinea( line );
 								
-								while ( contenidoLinea >> temporal )
+								while ( contenidoLinea >> temp )
 									{
-										numero[contador]=temporal;
-										contador++;
+										number[counter]=temp;
+										counter++;
 									}
 
 							}
 					}
 				
-				condiciones.close();
+				conditions.close();
 			}
 		
-		else cout << "No se pudo abrir el archivo."; 
+		else 
+			{	
+				cout << "Unable to read file.";
+				return 1;
+			}
 
 //Salidas
 
-		ofstream salidaMasa, salidaPresion, salidaDensidad, salidaPotencial;
+		ofstream massOut, pressureOut, densityOut, salidaPotencial;
 
-		salidaMasa.open ("masa.dat");
-		salidaPresion.open ("presion.dat");
-		salidaDensidad.open ("densidad.dat");
-		salidaPotencial.open ("potencial.dat");
+		massOut.open ("mass.dat");
+		pressureOut.open ("pressure.dat");
+		densityOut.open ("density.dat");
 
 //Valores inciales
 //
-		double densidad = numero[0];
-		double presion = numero[1];
-		double radioFinal = numero[2];
-		double radio = 0;
-		double masa = 0;
-		double potencial = 9.65098e+11;
+		double density = number[0];
+		double pressure = number[1];
+		double totalRadius = number[2];
+		polytropicConstant = number[3];
+		double radius = 0;
+		double mass = 0;
 		
 //Imprimir valores iniciales en la pantalla
 		
 		cout << "Condiciones Iniciales" << endl;
-		cout << "Densidad en el centro" << "\t" << densidad << endl;
-		cout << "Presión en el centro" << "\t" << presion << endl;
-		cout << "Radio" << "\t" << radioFinal << endl;
+		cout << "Densidad en el centro" << "\t" << density << endl;
+		cout << "Presión en el centro" << "\t" << pressure << endl;
+		cout << "Radio" << "\t" << totalRadius << endl;
 
-		int contadorIteraciones=0, filtrarDatos=10;
-		paso=1e5;
+		int iterationCount = 0, outFilter = 10;
+		step = 1e5;
 		
-		while (radio <= radioFinal)
+		while ( radius <= totalRadius )
 
 			{
 				//Imprimir valores cada n cáclculos
 				
-				if ( contadorIteraciones % filtrarDatos == 0 )
+				if ( iterationCount % outFilter == 0 )
 					{
-						salidaMasa << radio << "\t" << masa << endl;
-						salidaDensidad << radio << "\t" << densidad << endl;
-						salidaPresion << radio << "\t" << presion << endl;
-						salidaPotencial << radio << "\t" << potencial << endl;
+						massOut << radius << "\t" << mass << endl;
+						densityOut << radius << "\t" << density << endl;
+						pressureOut << radius << "\t" << pressure << endl;
 
-						if ( (paso / presion) >= 1e-12 )
+						if ( (step / pressure) >= 1e-12 )
 							{
-								paso /= 10;
-								filtrarDatos *= 10;
+								step /= 10;
+								outFilter *= 10;
 							}
 					}
 
-				//Sumar el tamaño de paso
+				//Sumar el tamaño de step
 
-				radio += ::paso;
-				contadorIteraciones++;
+				radius += step;
+				iterationCount++;
 
 				//Calcular nuevos valores
 
-				densidad = funcionDensidad( presion );
-				masa = funcionMasa( radio , masa , densidad );
-				presion = funcionPresion( radio , presion , masa , densidad );
-				potencial = funcionPotencial( radio , potencial , masa);
+				density = densityFunction( pressure );
+				mass = massFunction( radius , mass , density );
+				pressure = pressureFunction( radius , pressure , mass , density );
 
 			}
 
-		cout << "Iteraciones Realizadas" << "\t" << contadorIteraciones << endl;
-		cout << "Tamaño de paso final" << "\t" << paso << endl;
+		cout << "Iteraciones Realizadas" << "\t" << iterationCount << endl;
+		cout << "Tamaño de step final" << "\t" << step << endl;
 
 		return 0;
 	
@@ -132,84 +131,61 @@ int main ()
 
 //Masa
 
-double derivadaMasa(double radio, double masa, double densidad)
+double massDerivative(double radius, double mass, double density)
 	{
-		double derivada = 4 * ::pi * pow ( radio , 2 ) * densidad ;
+		double derivative = 4 * ::pi * pow (radius , 2) * density ;
 		
-		return derivada;
+		return derivative;
 	}
 
-double funcionMasa(double x, double y, double densidad)
+double massFunction(double x, double y, double density)
 	{
 		double k1,k2,k3,k4;
 		double nuevaY;
 		
-		k1=derivadaMasa( x , y , densidad);
-		k2=derivadaMasa(x+0.5* ::paso, y+ 0.5* ::paso * k1, densidad);
-		k3=derivadaMasa(x+ 0.5 * ::paso, y + 0.5* ::paso *k2 , densidad);
-		k4=derivadaMasa(x+ ::paso, y + ::paso *k3 , densidad );
+		k1=massDerivative( x , y , density);
+		k2=massDerivative(x+0.5* ::step , y+0.5*::step*k1, density);
+		k3=massDerivative(x+ 0.5 * ::step, y + 0.5* ::step *k2 , density);
+		k4=massDerivative(x+ ::step, y + ::step *k3 , density );
 	
-		nuevaY = y + (::paso/6)*(k1+2*k2+2*k3+k4);
+		nuevaY = y + (::step/6)*(k1+2*k2+2*k3+k4);
 
 		return nuevaY;
 	}
 
 //Presión
 
-double derivadaPresion(double radio, double presion , double masa, double densidad)
+double pressureDerivative(double radius, double pressure , double mass, double density)
 	{
-		double derivada = -1 * ::constanteGravitacional * masa * ( 1 / pow ( radio , 2 ) ) * densidad ;
+		double derivative = -1 * ::gravitationalConstant * mass * ( 1 / pow( radius , 2 ) ) * density ;
 		
-		return derivada;
+		return derivative;
 	}
 
-double funcionPresion(double x, double y, double masa, double densidad)
+double pressureFunction(double x, double y, double mass, double density)
 	{
 		double k1,k2,k3,k4;
 		double nuevaY;
 		
-		k1=derivadaPresion( x , y , masa, densidad);
-		k2=derivadaPresion(x+0.5* ::paso, y+ 0.5* ::paso * k1, masa, densidad);
-		k3=derivadaPresion(x+ 0.5 * ::paso, y + 0.5* ::paso *k2, masa , densidad);
-		k4=derivadaPresion(x+ ::paso, y + ::paso *k3, masa , densidad );
+		k1=pressureDerivative( x , y , mass, density);
+		k2=pressureDerivative(x+0.5* ::step, y+ 0.5* ::step * k1, mass, density);
+		k3=pressureDerivative(x+ 0.5 * ::step, y + 0.5* ::step *k2, mass , density);
+		k4=pressureDerivative(x+ ::step, y + ::step *k3, mass , density );
 	
-		nuevaY = y + (::paso/6)*(k1+2*k2+2*k3+k4);
+		nuevaY = y + (::step/6)*(k1+2*k2+2*k3+k4);
 
 		return nuevaY;
 	}
 
 
 //Densidad
-double funcionDensidad( double presion )
+double densityFunction( double pressure )
 	{
 		double nuevoValor, base;
 
-		base = (presion / politropica);
+		base = ( pressure / polytropicConstant );
 
-		nuevoValor = pow ( base , inversoGama );
+		nuevoValor = pow( base , polytropicIndex );
 		
 		return nuevoValor;
-	}
-
-//Potencial Gravitacional
-double derivadaPotencial ( double radio, double potencial, double masa )
-	{
-		double derivada = -1 * ::constanteGravitacional * masa * ( 1 / pow ( radio , 2 ) ) ;
-		
-		return derivada;
-	}
-
-double funcionPotencial(double x, double y, double masa)
-	{
-		double k1,k2,k3,k4;
-		double nuevaY;
-		
-		k1=derivadaPotencial( x , y , masa);
-		k2=derivadaPotencial(x+0.5* ::paso, y+ 0.5* ::paso * k1, masa);
-		k3=derivadaPotencial(x+ 0.5 * ::paso, y + 0.5* ::paso *k2, masa);
-		k4=derivadaPotencial(x+ ::paso, y + ::paso *k3, masa );
-	
-		nuevaY = y + (::paso/6)*(k1+2*k2+2*k3+k4);
-
-		return nuevaY;
 	}
