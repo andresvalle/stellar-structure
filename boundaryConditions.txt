@@ -4,10 +4,18 @@
 #
 
 # Core density ( kg / m^3 )
-156000
+#1.56e5
+6.16e4
 
 # Core pressure ( Pa )
 2.38e16
 
 # Total radius ( m )
-696000000
+6.96e8
+
+#
+#	Other constants
+#
+
+# Polytropic Constant ( (m/s)^2 )
+2.478e8
