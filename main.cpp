@@ -28,7 +28,7 @@ double pressureDerivative(double , double , double , double );
 int main ( )
 	{
 
-//lectura de condiciones iniciales
+//Getting the boundary conditions and other constants from a file
 
 		string line;
 		ifstream conditions("boundaryConditions.txt");
@@ -39,8 +39,7 @@ int main ( )
 			{
 				while ( getline ( conditions , line ) )
 					{
-						//Si la linea del archivo de condiciones iniciales comienza con
-						// ### es un comentario
+						/*If the line starts with '#' then it is a comment*/
 						if( line[0] != '#' )
 							{
 
@@ -64,7 +63,7 @@ int main ( )
 				return 1;
 			}
 
-//Salidas
+//Outs
 
 		ofstream massOut, pressureOut, densityOut, salidaPotencial;
 
@@ -73,7 +72,7 @@ int main ( )
 		densityOut.open ("density.dat");
 
 //Valores inciales
-//
+
 		double density = number[0];
 		double pressure = number[1];
 		double totalRadius = number[2];
