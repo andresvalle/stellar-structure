@@ -16,5 +16,3 @@ main.o : main.cpp Initialize.h SSFunctions.h
 
 Initialize.o : Initialize.h Initialize.cpp
 	$(CC) $(CFLAGS) Initialize.cpp
-
-
