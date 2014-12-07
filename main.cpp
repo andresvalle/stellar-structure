@@ -6,7 +6,7 @@
 #include <sstream>
 #include "Initialize.h"
 #include "SSFunctions.h"
-
+ 
 
 	using namespace std; //Mainly because YOLO
 
@@ -27,9 +27,11 @@ int main ( )
 
 		ofstream massOut, pressureOut, densityOut, salidaPotencial;
 
-		massOut.open ("mass.dat");
-		pressureOut.open ("pressure.dat");
-		densityOut.open ("density.dat");
+		//Output files are stored in folder "data"
+
+		massOut.open ("./data/mass.dat");
+		pressureOut.open ("./data/pressure.dat");
+		densityOut.open ("./data/density.dat");
 
 //Initial values
 
