@@ -1,3 +1,5 @@
+// This file only contains the definition of the 'initialize' function
+
 #include <fstream> 
 #include <iostream>
 #include <string>
