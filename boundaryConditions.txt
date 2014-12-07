@@ -1,5 +1,5 @@
 #
-#	Boundary Conditions
+#	Boundary Conditions for the Sun
 #	SI units
 #
 
