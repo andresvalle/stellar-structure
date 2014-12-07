@@ -1,10 +1,9 @@
 #
-#	Boundary Conditions for the Sun
+#	Boundary Conditions for the Sun (Example)
 #	SI units
 #
 
 # Core density ( kg / m^3 )
-#1.56e5
 6.16e4
 
 # Core pressure ( Pa )
