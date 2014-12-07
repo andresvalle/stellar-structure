@@ -1,67 +1,27 @@
+/* Main file of Stellar Structure. */
+
 #include <fstream> 
-#include <iomanip> 
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <cmath>
+#include "Initialize.h"
+#include "SSFunctions.h"
 
 
-	using namespace std;
-
-
-//Constants
-double step;
-double polytropicConstant;
-const double pi = 3.141592653589793238463;
-const double gravitationalConstant = 6.67384e-11;
-const double polytropicIndex = 0.6;
-
-
-//Prototipes
-double massFunction(double , double , double );
-double massDerivative(double , double , double );
-double densityFunction( double );
-double pressureFunction(double , double , double , double );
-double pressureDerivative(double , double , double , double );
+	using namespace std; //Mainly because YOLO
 
 
 int main ( )
 	{
 
 //Getting the boundary conditions and other constants from a file
+//The numbers are stored in 'numberArray'
 
-		string line;
-		ifstream conditions("boundaryConditions.txt");
-		int counter=0;
-	 	double number[20] , temp = 0;  
-
-		if ( conditions.is_open() )
-			{
-				while ( getline ( conditions , line ) )
-					{
-						/*If the line starts with '#' then it is a comment*/
-						if( line[0] != '#' )
-							{
-
-								istringstream contenidoLinea( line );
-								
-								while ( contenidoLinea >> temp )
-									{
-										number[counter]=temp;
-										counter++;
-									}
-
-							}
-					}
-				
-				conditions.close();
-			}
+	 	double numberArray[10] = { };  
 		
-		else 
-			{	
-				cout << "Unable to read file.";
-				return 1;
-			}
+		string fileName( "boundaryConditions.txt" );
+		
+		initialize( fileName , numberArray );
 
 //Outs
 
@@ -71,29 +31,31 @@ int main ( )
 		pressureOut.open ("pressure.dat");
 		densityOut.open ("density.dat");
 
-//Valores inciales
+//Initial values
 
-		double density = number[0];
-		double pressure = number[1];
-		double totalRadius = number[2];
-		polytropicConstant = number[3];
+		double density = numberArray[0];
+		double pressure = numberArray[1];
+		double totalRadius = numberArray[2];
+		double polytropicConstant = numberArray[3];
 		double radius = 0;
 		double mass = 0;
 		
-//Imprimir valores iniciales en la pantalla
+//Print initial values on screen
 		
-		cout << "Condiciones Iniciales" << endl;
-		cout << "Densidad en el centro" << "\t" << density << endl;
-		cout << "Presión en el centro" << "\t" << pressure << endl;
-		cout << "Radio" << "\t" << totalRadius << endl;
+		cout << "Initial Conditions" << endl;
+		cout << "Core Density" << "\t" << density << endl;
+		cout << "Core Pressure" << "\t" << pressure << endl;
+		cout << "Radius" << "\t" << totalRadius << endl;
 
 		int iterationCount = 0, outFilter = 10;
-		step = 1e5;
+		
+		double stepSize = 1e5; //Step size for the RK4
 		
 		while ( radius <= totalRadius )
 
 			{
-				//Imprimir valores cada n cáclculos
+				/* Due to the huge amount of calculations this program does, only some calculations will be printed to file.
+				 * The program prints data each 'outFilter' cycle */
 				
 				if ( iterationCount % outFilter == 0 )
 					{
@@ -101,90 +63,34 @@ int main ( )
 						densityOut << radius << "\t" << density << endl;
 						pressureOut << radius << "\t" << pressure << endl;
 
-						if ( (step / pressure) >= 1e-12 )
+						/* Since pressure will approach zero when the radius is near the total radius
+						 * it is necessary to adjust the step size to make sure that it is still "small"
+						 * compared to the pressure value. Since this chage will create more values
+						 * the 'outFilter' gets an adjustment as well. */
+
+						if ( (stepSize / pressure) >= 1e-15 )
 							{
-								step /= 10;
+								stepSize /= 10;
 								outFilter *= 10;
 							}
 					}
 
-				//Sumar el tamaño de step
+				//Add the step size to the radius and update the counter
 
-				radius += step;
+				radius += stepSize;
 				iterationCount++;
 
-				//Calcular nuevos valores
+				//Calculate the new values
 
-				density = densityFunction( pressure );
-				mass = massFunction( radius , mass , density );
-				pressure = pressureFunction( radius , pressure , mass , density );
+				density = densityFunction( pressure , polytropicConstant );
+				mass = massFunction( radius , mass , density , stepSize );
+				pressure = pressureFunction( radius , pressure , mass , density , stepSize );
 
 			}
 
-		cout << "Iteraciones Realizadas" << "\t" << iterationCount << endl;
-		cout << "Tamaño de step final" << "\t" << step << endl;
+		cout << "Iteration Count" << "\t" << iterationCount << endl;
+		cout << "Final Step Size" << "\t" << stepSize << endl; //Only mere curiosity
 
 		return 0;
 	
-	}
-
-//Masa
-
-double massDerivative(double radius, double mass, double density)
-	{
-		double derivative = 4 * ::pi * pow (radius , 2) * density ;
-		
-		return derivative;
-	}
-
-double massFunction(double x, double y, double density)
-	{
-		double k1,k2,k3,k4;
-		double nuevaY;
-		
-		k1=massDerivative( x , y , density);
-		k2=massDerivative(x+0.5* ::step , y+0.5*::step*k1, density);
-		k3=massDerivative(x+ 0.5 * ::step, y + 0.5* ::step *k2 , density);
-		k4=massDerivative(x+ ::step, y + ::step *k3 , density );
-	
-		nuevaY = y + (::step/6)*(k1+2*k2+2*k3+k4);
-
-		return nuevaY;
-	}
-
-//Presión
-
-double pressureDerivative(double radius, double pressure , double mass, double density)
-	{
-		double derivative = -1 * ::gravitationalConstant * mass * ( 1 / pow( radius , 2 ) ) * density ;
-		
-		return derivative;
-	}
-
-double pressureFunction(double x, double y, double mass, double density)
-	{
-		double k1,k2,k3,k4;
-		double nuevaY;
-		
-		k1=pressureDerivative( x , y , mass, density);
-		k2=pressureDerivative(x+0.5* ::step, y+ 0.5* ::step * k1, mass, density);
-		k3=pressureDerivative(x+ 0.5 * ::step, y + 0.5* ::step *k2, mass , density);
-		k4=pressureDerivative(x+ ::step, y + ::step *k3, mass , density );
-	
-		nuevaY = y + (::step/6)*(k1+2*k2+2*k3+k4);
-
-		return nuevaY;
-	}
-
-
-//Densidad
-double densityFunction( double pressure )
-	{
-		double nuevoValor, base;
-
-		base = ( pressure / polytropicConstant );
-
-		nuevoValor = pow( base , polytropicIndex );
-		
-		return nuevoValor;
 	}
