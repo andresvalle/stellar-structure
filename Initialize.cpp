@@ -8,7 +8,7 @@
 #include "Initialize.h"
 
 
-	using namespace std;
+	using namespace std; //Because YOLO
 
 
 /* This function reads the initial values in the text file and
