@@ -33,6 +33,8 @@ The program generates three ".dat" files, one for each funtion (mass, density, p
 
 | Radius | Function |
 
+| ------ |:--------:|
+
 You can see a plot of a typical output [here] (https://www.dropbox.com/s/69w10ssrumwlnhx/typicalOutput.pdf?dl=0 "Typical Output").
 
 ## To do list
