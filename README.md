@@ -13,7 +13,7 @@ A comprehensive list of the equations solved and the constants that are required
 
 ## How to compile
 
-From the `/stellar-structure` directory (wherever you decide to put it) compile with
+From the `/stellar-structure` directory (wherever you decide to place it) compile with
 
 ```
 makefile 
