@@ -16,7 +16,7 @@ A comprehensive list of the equations solved and the constants that are required
 From the `/stellar-structure` directory (wherever you decide to place it) compile with
 
 ```
-makefile 
+make
 ```
 
 To use the program, edit the `boundaryConditions.txt` file with the data of a main sequence star of your choice. Then run
